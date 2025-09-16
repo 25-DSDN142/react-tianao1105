@@ -18,21 +18,31 @@ function drawInteraction(faces, hands) {
     let indexFingerTipX = hand.index_finger_tip.x;
     let indexFingerTipY = hand.index_finger_tip.y;
 
-    //  let pinkyFingerTipX = hand.pinky_finger_tip.x;
-    //  let pinkyFingerTipY = hand.pinky_finger_tip.y;
+    let pinkyFingerTipX = hand.pinky_finger_tip.x;
+    let pinkyFingerTipY = hand.pinky_finger_tip.y;
+
+    let middleFingerTipX = hand.middle_finger_tip.x;
+    let middleFingerTipY = hand.middle_finger_tip.y;
+
+    let ringFingerTipX = hand.ring_finger_tip.x;
+    let ringFingerTipY = hand.ring_finger_tip.y;
+    let wristX = hand.wrist.x;
+    let wristY = hand.wrist.y;
 
     /*
     Start drawing on the hands here
     */
 
     fill(225, 225, 0);
-    ellipse(indexFingerTipX, indexFingerTipY, 30, 30);
-
+    let middleOfHandX = (middleFingerTipX + wristX)/2;
+    let middleOfHandY = (middleFingerTipY + wristY)/2;
+    let sizeOfEllipse = dist( middleFingerTipX, middleFingerTipY ,wristX, wristY);
+     ellipse(middleOfHandX, middleOfHandY, sizeOfEllipse, sizeOfEllipse);
     // drawPoints(hand)
 
-    //fingerPuppet(indexFingerTipX, indexFingerTipY);
+    // fingerPuppet(indexFingerTipX, indexFingerTipY);
 
-    //chameleonHandPuppet(hand)
+    // chameleonHandPuppet(hand)
 
     /*
     Stop drawing on the hands here
