@@ -1,7 +1,7 @@
 // ----=  Faces  =----
 /* load images here */
 function prepareInteraction() {
-  //bgImage = loadImage('/images/background.png');
+  bgImage = loadImage('/images/background.png');
 }
 
 function drawInteraction(faces, hands) {
@@ -61,20 +61,36 @@ function drawInteraction(faces, hands) {
 
     let noseTipX = face.keypoints[4].x;
     let noseTipY = face.keypoints[4].y;
+    let headX = face.keypoints[6].x;
+    let headY = face.keypoints[6].y;
+    let chinX = face.keypoints[206].x;
+    let chinY = face.keypoints[206].y;
+    let chinWidth =dist(chinX, chinY, face.keypoints[426].x, face.keypoints[426].y,);
+    let chinHeight =dist(chinX, chinY, face.keypoints[149].x, face.keypoints[149].y,);
+
     /*
     Start drawing on the face here
     */
-    noStroke()
-    fill(225, 225, 0);
+    noStroke();
+    fill(255);
+    ellipse(headX, headY, faceWidth, faceWidth);
+    rect(chinX, chinY, chinWidth, chinHeight, 10);
+    
+    fill(0, 0, 0, 90);
     // fill(get(leftEyeCenterX, leftEyeCenterY))
 
-    ellipse(leftEyeCenterX, leftEyeCenterY, leftEyeWidth, leftEyeHeight);
+    ellipse(leftEyeCenterX, leftEyeCenterY, leftEyeWidth, leftEyeWidth);
+    ellipse(rightEyeCenterX, rightEyeCenterY, leftEyeWidth, leftEyeWidth);
+    
+   
 
-    drawPoints(face.leftEye);
-    drawPoints(face.leftEyebrow);
-    drawPoints(face.lips);
-    drawPoints(face.rightEye);
-    drawPoints(face.rightEyebrow);
+
+
+    // drawPoints(face.leftEye);
+    // drawPoints(face.leftEyebrow);
+    // drawPoints(face.lips);
+    // drawPoints(face.rightEye);
+    // drawPoints(face.rightEyebrow);
 
     // drawX(rightEyeCenterX,rightEyeCenterY);
     // drawX(leftEyeCenterX,leftEyeCenterY);
