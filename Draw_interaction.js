@@ -3,6 +3,7 @@ function prepareInteraction() {
   //bgImage = loadImage('/images/background.png');
 }
 
+
 function drawInteraction(faces, hands) {
 
   // hands part
@@ -16,16 +17,55 @@ function drawInteraction(faces, hands) {
       drawPoints(hand)
       drawConnections(hand)
     }
+    
     // console.log(hand);
+    //8
     let indexFingerTipX = hand.index_finger_tip.x;
     let indexFingerTipY = hand.index_finger_tip.y;
+    //7
+    let indexFingerDipX = hand.index_finger_dip.x;
+    let indexFingerDipY = hand.index_finger_dip.y;
+  
+   
+    //6
+    let indexFingerPipX = hand.index_finger_pip.x;
+    let indexFingerPipY = hand.index_finger_pip.y;
+  
+    //5
+    let indexFingerMcpX = hand.index_finger_mcp.x;
+    let indexFingerMcpY = hand.index_finger_mcp.y;
+    //7-6
+    let bone2 = dist(indexFingerDipX, indexFingerDipY, indexFingerPipX, indexFingerPipY);
+    //6-5
+    let bone3 =dist(indexFingerPipX, indexFingerPipY, indexFingerMcpX, indexFingerMcpY); 
+    //8-7
+    let bone1 = dist(indexFingerTipX, indexFingerTipY,indexFingerDipX, indexFingerDipY);
+    //9
+    let middleFingerMcpX = hand.middle_finger_mcp.x;
+    let middleFingerMcpY = hand.middle_finger_mcp.y;
     /*
     Start drawing on the hands here
     */
 
     // pinchCircle(hand)
-    fill(225, 225, 0);
-    ellipse(indexFingerTipX, indexFingerTipY, 30, 30);
+    fill(255, 255, 255);
+    //8-7
+    triangle(indexFingerTipX, indexFingerTipY, indexFingerDipX+bone1/2, indexFingerDipY, indexFingerDipX-bone1/2, indexFingerDipY);
+    //7-6
+  
+   
+    let dx = indexFingerMcpX ;
+    let dy = indexFingerMcpY ;
+    push();
+    let rotateAmount;
+    rotateAmount= Math.atan2(dx,dy); 
+    rotate(rotateAmount);
+    rectMode(CENTER);
+    rect( (indexFingerPipX+ indexFingerDipX)/2, (indexFingerPipY+ indexFingerDipY)/2,bone1, bone2, bone2/5);
+    pop();
+    
+
+
 
     /*
     Stop drawing on the hands here
@@ -57,15 +97,34 @@ function drawInteraction(faces, hands) {
     /*
     Start drawing on the face here
     */
+    let faceWidth = face.faceOval.width;
+    let leftEyeCenterX = face.leftEye.centerX;
+    let leftEyeCenterY = face.leftEye.centerY;
+    let leftEyeWidth = face.leftEye.width;
+    let leftEyeHeight = face.leftEye.height;
+    let rightEyeCenterX = face.rightEye.centerX;
+    let rightEyeCenterY = face.rightEye.centerY;
+    let headX = face.keypoints[6].x;
+    let headY = face.keypoints[6].y;
+    let chinX = face.keypoints[206].x;
+    let chinY = face.keypoints[206].y;
+    let chinWidth = dist(chinX, chinY, face.keypoints[426].x, face.keypoints[426].y,);
+    let chinHeight = dist(chinX, chinY, face.keypoints[149].x, face.keypoints[149].y,);
 
-    // fill(225, 225, 0);
-    // ellipse(leftEyeCenterX, leftEyeCenterY, leftEyeWidth, leftEyeHeight);
+    noStroke();
+    fill(255);
+    ellipse(headX, headY, faceWidth, faceWidth);
+    rect(chinX, chinY, chinWidth, chinHeight, 10);
+    
+    fill(0, 0, 0, 90);
+  
+    ellipse(leftEyeCenterX, leftEyeCenterY, leftEyeWidth, leftEyeWidth);
+    ellipse(rightEyeCenterX, rightEyeCenterY, leftEyeWidth, leftEyeWidth);
 
-    drawPoints(face.leftEye);
-    drawPoints(face.leftEyebrow);
-    drawPoints(face.lips);
-    drawPoints(face.rightEye);
-    drawPoints(face.rightEyebrow);
+    fill(225, 225, 0);
+    ellipse(leftEyeCenterX, leftEyeCenterY, leftEyeWidth, leftEyeHeight);
+    
+  
     /*
     Stop drawing on the face here
     */

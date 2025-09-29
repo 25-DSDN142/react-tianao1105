@@ -136,7 +136,7 @@ function drawPoints(feature) {
   for (let i = 0; i < feature.keypoints.length; i++) {
     let element = feature.keypoints[i];
     noStroke();
-    fill(0, 255, 0);
+    fill(0, 25, 0);
     circle(element.x, element.y, 10);
   }
   pop()
