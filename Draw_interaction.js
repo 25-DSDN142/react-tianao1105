@@ -1,11 +1,11 @@
 // ----=  HANDS  =----
 function prepareInteraction() {
-  //bgImage = loadImage('/images/background.png');
+  bgImage = loadImage('/images/background.png');
 }
 
 
 function drawInteraction(faces, hands) {
-
+image(bgImage, 0, 0, width, height);
   // hands part
   // USING THE GESTURE DETECTORS (check their values in the debug menu)
   // detectHandGesture(hand) returns "Pinch", "Peace", "Thumbs Up", "Pointing", "Open Palm", or "Fist"
@@ -269,11 +269,7 @@ function drawInteraction(faces, hands) {
     fill(255, 255, 255);
 
     // 绘制指尖三角形 (20-19)
-    triangle(
-        pinkyFingerTipX, pinkyFingerTipY, 
-        pinkyFingerDipX + pinkybone1/3, pinkyFingerDipY, 
-        pinkyFingerDipX - pinkybone1/3, pinkyFingerDipY
-    );
+    triangle(pinkyFingerTipX, pinkyFingerTipY, pinkyFingerDipX + pinkybone1/3, pinkyFingerDipY,  pinkyFingerDipX - pinkybone1/3, pinkyFingerDipY);
 
     // 绘制第一段骨骼 (19-18)
     push();
@@ -399,6 +395,36 @@ function drawInteraction(faces, hands) {
     pop();
 
 
+    //puppet
+    noFill();
+    stroke(255);
+    strokeWeight(2);
+    
+    //4
+    line(thumbTipX, thumbTipY, thumbTipX, thumbTipY+300);
+    //8
+    line(indexFingerTipX, indexFingerTipY, indexFingerTipX, indexFingerTipY+150);
+    //12
+    line(middleFingerTipX, middleFingerTipY, middleFingerTipX, middleFingerTipY+150);
+    //16
+    line(ringFingerTipX, ringFingerTipY, ringFingerTipX, ringFingerTipY+150);
+    //20
+    line(pinkyFingerTipX, pinkyFingerTipY, pinkyFingerTipX, pinkyFingerTipY+300);
+    //puppet bdoy
+    fill(194, 190, 163);
+    stroke(194, 190, 163);
+    ellipse(middleFingerTipX, middleFingerTipY+150, 80, 80);
+    strokeWeight(50);
+    line(middleFingerTipX, middleFingerTipY+200,middleFingerTipX, middleFingerTipY+300)
+    strokeWeight(20);
+
+    line(middleFingerTipX, middleFingerTipY+180, indexFingerTipX, indexFingerTipY+150);
+    line(middleFingerTipX, middleFingerTipY+180, ringFingerTipX, ringFingerTipY+150);
+
+    line(middleFingerTipX, middleFingerTipY+300,  thumbTipX, thumbTipY+300);
+    line(middleFingerTipX, middleFingerTipY+300, pinkyFingerTipX, pinkyFingerTipY+300);
+    
+    
 
     /*
     Stop drawing on the hands here
@@ -435,28 +461,57 @@ function drawInteraction(faces, hands) {
     let leftEyeCenterY = face.leftEye.centerY;
     let leftEyeWidth = face.leftEye.width;
     let leftEyeHeight = face.leftEye.height;
+
     let rightEyeCenterX = face.rightEye.centerX;
     let rightEyeCenterY = face.rightEye.centerY;
-    let headX = face.keypoints[6].x;
-    let headY = face.keypoints[6].y;
+    let rightEyeWidth = face.rightEye.width;
+    let rightEyeHeight = face.rightEye.height;
     let chinX = face.keypoints[206].x;
     let chinY = face.keypoints[206].y;
     let chinWidth = dist(chinX, chinY, face.keypoints[426].x, face.keypoints[426].y,);
     let chinHeight = dist(chinX, chinY, face.keypoints[149].x, face.keypoints[149].y,);
 
-    noStroke();
+    stroke(135);
+    strokeWeight(8);
 
     fill(255);
-    ellipse(headX, headY, faceWidth, faceWidth);
-    rect(chinX, chinY, chinWidth, chinHeight, 10);
-    
+    //head
+    beginShape();
+    vertex(face.keypoints[10].x, face.keypoints[10].y);
+    bezierVertex(face.keypoints[67].x, face.keypoints[67].y,face.keypoints[103].x, face.keypoints[103].y,face.keypoints[71].x, face.keypoints[71].y);
+    bezierVertex(face.keypoints[127].x, face.keypoints[127].y,face.keypoints[234].x, face.keypoints[234].y,face.keypoints[186].x, face.keypoints[186].y);
+    vertex(face.keypoints[170].x, face.keypoints[170].y);
+    vertex(face.keypoints[395].x, face.keypoints[395].y);
+    vertex(face.keypoints[410].x, face.keypoints[410].y);
+    bezierVertex(face.keypoints[454].x, face.keypoints[454].y,face.keypoints[356].x, face.keypoints[356].y,face.keypoints[301].x, face.keypoints[301].y);
+    bezierVertex(face.keypoints[297].x, face.keypoints[297].y,face.keypoints[338].x, face.keypoints[338].y,face.keypoints[10].x, face.keypoints[10].y);
+    endShape();
+    //nose
+    stroke(0,0,0,50);
+    strokeWeight(8);
+    fill(170)
+    beginShape();
+    vertex(face.keypoints[197].x, face.keypoints[197].y);
+    bezierVertex(face.keypoints[129].x, face.keypoints[129].y,face.keypoints[64].x, face.keypoints[64].y,face.keypoints[219].x, face.keypoints[219].y);
+    bezierVertex(face.keypoints[237].x, face.keypoints[237].y,face.keypoints[44].x, face.keypoints[44].y,face.keypoints[4].x, face.keypoints[4].y);
+    bezierVertex(face.keypoints[274].x, face.keypoints[274].y,face.keypoints[457].x, face.keypoints[457].y,face.keypoints[439].x, face.keypoints[439].y);
+    bezierVertex(face.keypoints[294].x, face.keypoints[294].y,face.keypoints[358].x, face.keypoints[358].y,face.keypoints[197].x, face.keypoints[197].y);
+    endShape();
+    //mouth
+    line(face.keypoints[80].x, face.keypoints[80].y,face.keypoints[88].x, face.keypoints[88].y);
+    line(face.keypoints[81].x, face.keypoints[81].y,face.keypoints[178].x, face.keypoints[178].y);
+    line(face.keypoints[82].x, face.keypoints[82].y,face.keypoints[87].x, face.keypoints[87].y);
+    line(face.keypoints[13].x, face.keypoints[13].y,face.keypoints[14].x, face.keypoints[14].y);
+    line(face.keypoints[312].x, face.keypoints[312].y,face.keypoints[317].x, face.keypoints[317].y);
+    line(face.keypoints[311].x, face.keypoints[311].y,face.keypoints[402].x, face.keypoints[402].y);
+    line(face.keypoints[310].x, face.keypoints[310].y,face.keypoints[318].x, face.keypoints[318].y);
+    //eyes
     fill(0, 0, 0, 90);
-  
-    ellipse(leftEyeCenterX, leftEyeCenterY, leftEyeWidth, leftEyeWidth);
-    ellipse(rightEyeCenterX, rightEyeCenterY, leftEyeWidth, leftEyeWidth);
+    ellipse(leftEyeCenterX, leftEyeCenterY, leftEyeWidth, leftEyeHeight*2.5);
+    ellipse(rightEyeCenterX, rightEyeCenterY, rightEyeWidth, rightEyeHeight*2.5);
 
     fill(225, 225, 0);
-    ellipse(leftEyeCenterX, leftEyeCenterY, leftEyeWidth, leftEyeHeight);
+    //ellipse(leftEyeCenterX, leftEyeCenterY, leftEyeWidth, leftEyeHeight);
     
   
     /*
