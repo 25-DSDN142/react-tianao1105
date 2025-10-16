@@ -1,4 +1,19 @@
 // ----=  HANDS  =----
+//The display of fireworks is achieved through the use of AI for the switching process.
+// Fist作为 Puppet 显示切换的全局状态
+let puppetVisible = false;
+let bothFistPrev = false; // 上升沿检测，避免长按重复触发/Rising edge detection to prevent repeated triggering due to long press
+
+// 右手食指烟花The right index finger of the hand lighting the fireworks
+let particles = [];
+const MAX_PARTICLES = 250;
+let rightIndexPrev = null; // 上一帧右手食指位置，用于滑动速度The position of the right index finger in the previous frame, used for controlling the sliding speed
+
+// 食指滑动轨迹（渐隐折线）The sliding trajectory of the index finger (gradually fading curve)
+let rightTrail = [];
+const TRAIL_LIFE = 60;
+const MAX_TRAIL_POINTS = 60;
+
 function prepareInteraction() {
   bgImage = loadImage('/images/background.png');
 }
@@ -6,6 +21,73 @@ function prepareInteraction() {
 
 function drawInteraction(faces, hands) {
 image(bgImage, 0, 0, width, height);
+
+  // 两只手都为 Fist 时在上升沿切换 puppetVisible
+  let fists = 0;
+  for (let i = 0; i < hands.length; i++) {
+    let g = (typeof detectHandGesture === 'function') ? detectHandGesture(hands[i]) : null;
+    if (g === 'Fist') fists++;
+  }
+  let bothFistNow = fists >= 2;
+  if (bothFistNow && !bothFistPrev) {
+    puppetVisible = !puppetVisible;
+  }
+  bothFistPrev = bothFistNow;
+
+  // 左手 Pinch + 右手 Pointing
+  let leftIsPinch = false;
+  let rightIsPointing = false;
+  let rightIndexPos = null;
+  for (let i = 0; i < hands.length; i++) {
+    let hand = hands[i];
+    let g = (typeof detectHandGesture === 'function') ? detectHandGesture(hand) : null;
+    if (hand.handedness === 'Left' && g === 'Pinch') leftIsPinch = true;
+    if (hand.handedness === 'Right') {
+      if (g === 'Pointing') rightIsPointing = true;
+      if (hand.index_finger_tip) rightIndexPos = { x: hand.index_finger_tip.x, y: hand.index_finger_tip.y };
+    }
+  }
+  // 触发条件满足时，在右手食指生成短寿命粒子/When the triggering condition is met, short-lived particles are generated on the index finger of the right hand.
+  //The particle effects are based on the examples of others in P5.JS and have been modified accordingly.
+  if (leftIsPinch && rightIsPointing && rightIndexPos) {
+    let baseVX = 0, baseVY = 0;
+    if (rightIndexPrev) {
+      baseVX = (rightIndexPos.x - rightIndexPrev.x) * 0.5;
+      baseVY = (rightIndexPos.y - rightIndexPrev.y) * 0.5;
+    }
+    //Limit the total number of particles to avoid stalling caused by accumulation.
+    if (particles.length > MAX_PARTICLES) {
+      particles.splice(0, particles.length - MAX_PARTICLES);
+    }
+    for (let k = 0; k < 8; k++) {
+      let ang = random(TWO_PI);
+      let spd = random(0.3, 1.8);
+      let life = random(45, 70);
+      particles.push({
+        x: rightIndexPos.x,
+        y: rightIndexPos.y,
+        vx: baseVX + cos(ang) * spd,
+        vy: baseVY + sin(ang) * spd,
+        life: life,
+        maxLife: life,
+        size: random(3.5, 6),
+        color: [random(200, 255), random(120, 255), random(20, 150)]
+      });
+    }
+  }
+  // 记录右手食指上一帧位置Record the position of the right index finger in the previous frame
+  rightIndexPrev = rightIndexPos ? rightIndexPos : null;
+
+  // 轨迹点采样Trajectory point sampling：左手 Pinch + 右手 Pointing 生效时追加一个点
+  if (leftIsPinch && rightIsPointing && rightIndexPos) {
+    const minDist = 1.5; // 采样间隔阈值，避免过密// Sampling interval threshold to avoid excessive density
+    const head = rightTrail[rightTrail.length - 1];
+    if (!head || dist(head.x, head.y, rightIndexPos.x, rightIndexPos.y) > minDist) {
+      rightTrail.push({ x: rightIndexPos.x, y: rightIndexPos.y, life: TRAIL_LIFE });
+      if (rightTrail.length > MAX_TRAIL_POINTS) rightTrail.shift();
+    }
+  }
+
   // hands part
   // USING THE GESTURE DETECTORS (check their values in the debug menu)
   // detectHandGesture(hand) returns "Pinch", "Peace", "Thumbs Up", "Pointing", "Open Palm", or "Fist"
@@ -60,20 +142,20 @@ image(bgImage, 0, 0, width, height);
     pop();
     //7-6
     push();
-    // 计算矩形中心点
+    // 计算矩形中心点/ Calculate the center point of the rectangle
      let centerX = (indexFingerPipX + indexFingerDipX) / 2; 
      let centerY = (indexFingerPipY + indexFingerDipY) / 2;
-    // 计算旋转角度 - 通常使用 atan2(dy, dx)
-    // 假设您想要根据手指方向旋转
+    // 计算旋转角度 /Calculate the rotation angle
+    // 根据手指方向旋转Rotate according to the direction of the finger
     let dx = indexFingerDipX - indexFingerPipX;
     let dy = indexFingerDipY - indexFingerPipY;
     let rotateAmount = Math.atan2(dy, dx);
-    // 设置矩形模式
+  
     rectMode(CENTER);
-    // 移动到矩形中心并旋转
+    
     translate(centerX, centerY);
     rotate(rotateAmount);
-    // 在原点绘制矩形（因为已经translate到中心点了）
+  
     rect(0, 0, indexbone2, indexbone2/3, indexbone2/5);
     pop();
      //8-7
@@ -396,6 +478,7 @@ image(bgImage, 0, 0, width, height);
 
 
     //puppet
+    if (puppetVisible) {
     noFill();
     stroke(255);
     strokeWeight(2);
@@ -410,7 +493,7 @@ image(bgImage, 0, 0, width, height);
     line(ringFingerTipX, ringFingerTipY, ringFingerTipX, ringFingerTipY+150);
     //20
     line(pinkyFingerTipX, pinkyFingerTipY, pinkyFingerTipX, pinkyFingerTipY+300);
-    //puppet bdoy
+    //puppet body
     fill(194, 190, 163);
     stroke(194, 190, 163);
     ellipse(middleFingerTipX, middleFingerTipY+150, 80, 80);
@@ -423,7 +506,7 @@ image(bgImage, 0, 0, width, height);
 
     line(middleFingerTipX, middleFingerTipY+300,  thumbTipX, thumbTipY+300);
     line(middleFingerTipX, middleFingerTipY+300, pinkyFingerTipX, pinkyFingerTipY+300);
-    
+    }
     
 
     /*
@@ -431,6 +514,62 @@ image(bgImage, 0, 0, width, height);
     */
   }
 
+  // 更新并绘制粒子Update and draw particles
+  for (let i = particles.length - 1; i >= 0; i--) {
+    const p = particles[i];
+    // 运动学：轻微阻尼（更小的阻尼使轨迹更长）Kinematics: Slight damping (smaller damping results in a longer trajectory)AI provides
+    const oldX = p.x;
+    const oldY = p.y;
+    p.vx *= 0.985;
+    p.vy *= 0.985;
+    p.x += p.vx;
+    p.y += p.vy;
+    p.life -= 1;
+
+    // 绘制运动轨迹线段Draw the trajectory line segments
+    const alpha = map(p.life, 0, p.maxLife, 0, 255);
+    push();
+    stroke(p.color[0], p.color[1], p.color[2], alpha * 0.5);
+    strokeWeight(p.size * 0.5);
+    line(oldX, oldY, p.x, p.y);
+    pop();
+
+    // 仅绘制核心点Only draw the core points
+    push();
+    noStroke();
+    fill(p.color[0], p.color[1], p.color[2], alpha * 0.9);
+    circle(p.x, p.y, p.size);
+    pop();
+
+    // 移除粒子Remove particles
+    if (p.life <= 0) {
+      particles.splice(i, 1);
+    }
+  }
+
+  // 绘制右手食指的轨迹折线Draw the trajectory line of the right index finger
+  if (rightTrail.length > 1) {
+    push();
+    noFill();
+    for (let i = 1; i < rightTrail.length; i++) {
+      const a = rightTrail[i - 1];
+      const b = rightTrail[i];
+      const lifeAvg = (a.life + b.life) * 0.5;
+      const t = constrain(lifeAvg / TRAIL_LIFE, 0, 1);
+      const alpha = 220 * t;              // 渐隐
+      const w = 1 + 6 * t;                // 渐细
+      stroke(255, 255, 255, alpha);
+      strokeWeight(w);
+      line(a.x, a.y, b.x, b.y);
+    }
+    pop();
+
+    // update and clean
+    for (let i = rightTrail.length - 1; i >= 0; i--) {
+      rightTrail[i].life -= 1;
+      if (rightTrail[i].life <= 0) rightTrail.splice(i, 1);
+    }
+  }
 
 
   //------------------------------------------------------------
